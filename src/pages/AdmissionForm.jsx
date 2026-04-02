@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react"; // useEffect yahan add karein
+import { useState, useEffect } from "react";
 import FileUpload from "./components/fileUpload";
 
 export default function AdmissionForm() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // 0 se shuru hoga (Instructions Screen)
   const [appNumber, setAppNumber] = useState("");
   const [fileErrors, setFileErrors] = useState({});
+  const [isAgreed, setIsAgreed] = useState(false); // Checkbox ke liye
+  const [submissionError, setSubmissionError] = useState(null); // Backend error ke liye
+
   const [formData, setFormData] = useState({
     full_name: "",
     father_name: "",
@@ -26,14 +29,20 @@ export default function AdmissionForm() {
 
   const [loading, setLoading] = useState(false);
 
+  // Pagination Logic
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
   const isPhoneValid = /^\d{10}$/.test(formData.phone);
+  const isEmailValid = formData.email
+    ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    : true;
   const isStep1Valid =
-    Object.values(formData).every((val) => val !== "") && isPhoneValid;
+    Object.values(formData).every((val) => val !== "") &&
+    isPhoneValid &&
+    isEmailValid;
 
-  // Jab bhi 'step' badle, screen top par chali jaye
+  // Scroll to Top on Step Change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
@@ -48,45 +57,27 @@ export default function AdmissionForm() {
     let error = "";
 
     if (file) {
-      // 1. Define Allowed Formats
       const imageTypes = ["image/jpeg", "image/jpg", "image/png"];
-      const documentTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "application/pdf",
-      ];
+      const documentTypes = [...imageTypes, "application/pdf"];
 
-      // 2. Conditional Check
       if (name === "photo" || name === "signature") {
-        // Photo aur Signature ke liye sirf Image
-        if (!imageTypes.includes(file.type)) {
-          error = "Only JPG/PNG images are allowed for Photo and Signature.";
-        }
+        if (!imageTypes.includes(file.type)) error = "Only JPG/PNG allowed.";
         if (file.size > 20000) error = "Max 20KB allowed";
       } else {
-        // Aadhaar, Marksheet, etc. ke liye Image + PDF dono
-        if (!documentTypes.includes(file.type)) {
-          error = "Only JPG/PNG or PDF files are allowed.";
-        }
+        if (!documentTypes.includes(file.type))
+          error = "Only JPG/PNG or PDF allowed.";
         if (file.size > 200000) error = "Max 200KB allowed";
       }
     }
-
     setFiles({ ...files, [name]: file });
     setFileErrors({ ...fileErrors, [name]: error });
   }
 
-  // Final Submit function
   async function finalSubmit() {
     setLoading(true);
+    setSubmissionError(null); // Pehle purane error saaf karein
     const data = new FormData();
-
-    // FormData mein text fields aur files ko add karna
-    Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
-    });
-
+    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
     Object.keys(files).forEach((key) => {
       if (files[key]) data.append(key, files[key]);
     });
@@ -96,308 +87,453 @@ export default function AdmissionForm() {
         method: "POST",
         body: data,
       });
-
       const result = await res.json();
 
       if (res.ok && result.success) {
         setAppNumber(result.application_number);
         setStep(5);
       } else {
-        // --- YE HAI WOH ELSE BLOCK JO MAINE DIYA THA ---
-        let msg = "Form Submission Not Successful!\n\n";
+        // Alert ki jagah hum state set karenge
+        let errorMsg =
+          result.error || "Submission Failed! Please check the details.";
 
         if (result.errors) {
-          // Har field ka error nikaal kar message mein jodna
-          Object.keys(result.errors).forEach((field) => {
-            msg += `• ${field.replace("_", " ").toUpperCase()}: ${result.errors[field][0]}\n`;
-          });
-        } else {
-          msg += result.error || "An unexpected server error occurred.";
+          // Agar multiple fields mein error hai (e.g., Email, Phone)
+          const fieldErrors = Object.entries(result.errors)
+            .map(
+              ([field, msgs]) =>
+                `${field.replace("_", " ").toUpperCase()}: ${msgs[0]}`,
+            )
+            .join(" | ");
+          errorMsg = fieldErrors;
         }
-
-        alert(msg);
-        // ----------------------------------------------
+        setSubmissionError(errorMsg);
       }
     } catch (error) {
-      console.error("Fetch Error:", error);
-      alert("Network Error: Backend se connection nahi ho paya.");
+      setSubmissionError(
+        "Network Connection Error: Server se sampark nahi ho paya.",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-pink-50 py-10 px-4">
-      <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow">
-        {/* Progress Bar */}
-        <div className="flex justify-between mb-6 text-sm font-semibold">
-          <span className={step >= 1 ? "text-pink-600" : ""}>1. Details</span>
-          <span className={step >= 2 ? "text-pink-600" : ""}>2. Documents</span>
-          <span className={step >= 3 ? "text-pink-600" : ""}>3. Preview</span>
-          <span className={step >= 4 ? "text-pink-600" : ""}>4. Submit</span>
-        </div>
+    <div className="min-h-screen bg-pink-50 py-6 px-4 font-sans">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* STEP 0: DETAILED INSTRUCTIONS */}
+        {step === 0 && (
+          <div className="p-8">
+            <div className="text-center mb-8 border-b-2 border-pink-100 pb-4">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-pink-700 uppercase">
+                GSSS Kuthar, Solan (H.P.)
+              </h1>
+              <p className="text-gray-600 font-semibold mt-2">
+                General Instructions & Discipline Rules | सामान्य दिशा-निर्देश
+              </p>
+            </div>
 
-        {/* STEP 1 */}
-        {step === 1 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-pink-600">Basic Details</h2>
-            <input
-              name="full_name"
-              placeholder="Full Name"
-              value={formData.full_name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            <input
-              name="father_name"
-              placeholder="Father Name"
-              value={formData.father_name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            <input
-              type="date"
-              name="dob"
-              value={formData.dob}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            >
-              <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-            <textarea
-              name="address"
-              placeholder="Address"
-              value={formData.address}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            ></textarea>
-            <input
-              name="class_applied"
-              placeholder="Class"
-              value={formData.class_applied}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            <input
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            <input
-              name="phone"
-              placeholder="Phone (10 digits)"
-              value={formData.phone}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded ${formData.phone && !isPhoneValid ? "border-red-500" : ""}`}
-            />
-            {!isPhoneValid && formData.phone && (
-              <p className="text-red-500 text-xs">Enter 10 digits without 0</p>
-            )}
-            <button
-              disabled={!isStep1Valid}
-              onClick={nextStep}
-              className="bg-pink-600 text-white px-6 py-2 rounded disabled:bg-gray-300"
-            >
-              Next
-            </button>
-          </div>
-        )}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 max-h-[60vh] overflow-y-auto mb-8 text-gray-800 leading-relaxed">
+              <section className="mb-6">
+                <h3 className="font-bold text-pink-600 text-lg border-b mb-3">
+                  1. General Discipline (सामान्य अनुशासन)
+                </h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <b>Punctuality:</b> Arrive 15 mins before Assembly.
+                    (प्रार्थना सभा से 15 मिनट पूर्व पहुंचें।)
+                  </li>
+                  <li>
+                    <b>Uniform:</b> Clean uniform and ID card is mandatory. (साफ
+                    वर्दी और पहचान पत्र अनिवार्य है।)
+                  </li>
+                  <li>
+                    <b>Cleanliness:</b> Keep campus clean. (विद्यालय परिसर को
+                    साफ रखें।)
+                  </li>
+                  <li>
+                    <b>Property:</b> Do not damage school furniture/walls.
+                    (स्कूल की संपत्ति को नुकसान न पहुँचाएं।)
+                  </li>
+                </ul>
+              </section>
 
-        {/* STEP 2: DOCUMENTS (UI FIXED) */}
-        {step === 2 && (
-          <div className="space-y-5">
-            <h2 className="text-xl font-bold text-pink-600">
-              Upload Documents
-            </h2>
-            <FileUpload
-              label="Aadhaar Card (Max 200KB)"
-              name="aadhaar_card"
-              onChange={handleFileChange}
-              error={fileErrors.aadhaar_card}
-              file={files.aadhaar_card}
-            />
-            <FileUpload
-              label="Photo (Max 20KB)"
-              name="photo"
-              onChange={handleFileChange}
-              error={fileErrors.photo}
-              file={files.photo}
-            />
-            <FileUpload
-              label="Signature (Max 20KB)"
-              name="signature"
-              onChange={handleFileChange}
-              error={fileErrors.signature}
-              file={files.signature}
-            />
-            <FileUpload
-              label="Marksheet (Max 200KB)"
-              name="marksheet"
-              onChange={handleFileChange}
-              error={fileErrors.marksheet}
-              file={files.marksheet}
-            />
-            <FileUpload
-              label="Roll Number Slip (Optional)"
-              name="roll_number_slip"
-              onChange={handleFileChange}
-              file={files.roll_number_slip}
-            />
+              <section className="mb-6">
+                <h3 className="font-bold text-pink-600 text-lg border-b mb-3">
+                  2. Safety & Health (सुरक्षा और स्वास्थ्य)
+                </h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <b>Prohibited Items:</b> No mobiles, smartwatches, or extra
+                    cash. (मोबाइल फोन या कीमती सामान न लाएं।)
+                  </li>
+                  <li>
+                    <b>Food:</b> Bring healthy home-cooked food and water. (घर
+                    का बना भोजन और पानी साथ लाएं।)
+                  </li>
+                </ul>
+              </section>
 
-            <div className="flex gap-4">
+              <section className="mb-6 bg-pink-50 p-4 rounded-lg border border-pink-200">
+                <h3 className="font-bold text-pink-800 text-lg mb-2">
+                  3. Documents Required (ज़रूरी दस्तावेज़)
+                </h3>
+                <div className="grid md:grid-cols-2 gap-2 text-sm">
+                  <p>• Aadhaar Card (&lt;200KB)</p>
+                  <p>• Student Photo (&lt;20KB)</p>
+                  <p>• Signature (&lt;20KB)</p>
+                  <p>• Previous Marksheet (&lt;200KB)</p>
+                </div>
+              </section>
+            </div>
+
+            <div className="flex flex-col items-center space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={isAgreed}
+                  onChange={(e) => setIsAgreed(e.target.checked)}
+                  className="w-5 h-5 accent-pink-600"
+                />
+                <span className="text-gray-700 text-sm md:text-base font-medium">
+                  I agree to follow all school rules. | मैं नियमों का पालन करने
+                  के लिए सहमत हूँ।
+                </span>
+              </label>
+
               <button
-                onClick={prevStep}
-                className="bg-gray-400 text-white px-4 py-2 rounded"
-              >
-                Back
-              </button>
-              <button
-                disabled={
-                  Object.values(fileErrors).some((e) => e !== "") ||
-                  !files.photo
-                }
+                disabled={!isAgreed}
                 onClick={nextStep}
-                className="bg-pink-600 text-white px-6 py-2 rounded disabled:bg-gray-300"
+                className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white text-lg font-bold py-3 px-12 rounded-full transition-all shadow-lg transform hover:scale-105 active:scale-95"
               >
-                Next
+                Proceed to Fill Form / फॉर्म भरें
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3 & 4 (Preview & Submit) ... keep as per previous logic with Back buttons */}
-        {step === 3 && (
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-pink-600">Preview</h2>
-            <p>
-              <b>Name:</b> {formData.full_name}
-            </p>
-            <p>
-              <b>Phone:</b> {formData.phone}
-            </p>
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={prevStep}
-                className="bg-gray-400 text-white px-4 py-2 rounded"
-              >
-                Back
-              </button>
-              <button
-                onClick={nextStep}
-                className="bg-pink-600 text-white px-6 py-2 rounded"
-              >
-                Proceed
-              </button>
-            </div>
+        {/* PROGRESS BAR (Visible from Step 1 to 4) */}
+        {step >= 1 && step <= 4 && (
+          <div className="bg-pink-600 p-4 flex justify-around text-[10px] md:text-sm text-white font-bold uppercase tracking-wider">
+            <span className={step >= 1 ? "opacity-100" : "opacity-40"}>
+              1. Details
+            </span>
+            <span className={step >= 2 ? "opacity-100" : "opacity-40"}>
+              2. Docs
+            </span>
+            <span className={step >= 3 ? "opacity-100" : "opacity-40"}>
+              3. Preview
+            </span>
+            <span className={step >= 4 ? "opacity-100" : "opacity-40"}>
+              4. Submit
+            </span>
           </div>
         )}
 
-        {step === 4 && (
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-pink-600 mb-4">
-              Final Submit
-            </h2>
-            <p className="mb-6">Click submit to finish your application.</p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={prevStep}
-                className="bg-gray-400 text-white px-4 py-2 rounded"
-              >
-                Back
-              </button>
-              <button
-                onClick={finalSubmit}
-                disabled={loading}
-                className="bg-green-600 text-white px-8 py-2 rounded"
-              >
-                {loading ? "Submitting..." : "Submit Now"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 5: FINAL ADMIT CARD DESIGN */}
-        {step === 5 && (
-          <div
-            id="printable-area"
-            className="border-2 border-pink-600 p-0 rounded-lg overflow-hidden"
-          >
-            <div className="bg-pink-600 text-white p-4 text-center">
-              <h2 className="text-xl font-bold uppercase">
-                GSSS KUTHAR - Provisional Registration
+        <div className="p-8">
+          {/* STEP 1: BASIC DETAILS */}
+          {step === 1 && (
+            <div className="animate-fadeIn space-y-4">
+              <h2 className="text-xl font-bold text-pink-600 border-b pb-2">
+                Student Basic Details
               </h2>
-              <p className="text-sm">Session 2026-2027</p>
+              <div className="grid md:grid-cols-2 gap-4">
+                <input
+                  name="full_name"
+                  placeholder="Student Full Name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500"
+                />
+                <input
+                  name="father_name"
+                  placeholder="Father's Name"
+                  value={formData.father_name}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500"
+                />
+                <input
+                  type="date"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg"
+                />
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg"
+                >
+                  <option value="">Select Gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                </select>
+                <input
+                  name="class_applied"
+                  placeholder="Class (e.g. 9th, 11th)"
+                  value={formData.class_applied}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg"
+                />
+                {/* Email Input Step 1 mein dhundhein aur uske niche ye line add karein */}
+                <input
+                  name="email"
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full p-3 border rounded-lg ${formData.email && !isEmailValid ? "border-red-500" : ""}`}
+                />
+                {/* Naya Error Message */}
+                {!isEmailValid && formData.email && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Please enter a valid email address (e.g. name@mail.com).
+                  </p>
+                )}
+                <div className="col-span-full">
+                  <input
+                    name="phone"
+                    placeholder="Phone (10 digits)"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={`w-full p-3 border rounded-lg ${formData.phone && !isPhoneValid ? "border-red-500" : ""}`}
+                  />
+                  {!isPhoneValid && formData.phone && (
+                    <p className="text-red-500 text-xs mt-1">
+                      Please enter a valid 10-digit number.
+                    </p>
+                  )}
+                </div>
+                <textarea
+                  name="address"
+                  placeholder="Full Home Address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg col-span-full h-24"
+                ></textarea>
+              </div>
+              <button
+                disabled={!isStep1Valid}
+                onClick={nextStep}
+                className="bg-pink-600 text-white px-8 py-3 rounded-lg font-bold disabled:bg-gray-300 w-full md:w-auto"
+              >
+                Next Step
+              </button>
             </div>
+          )}
 
-            <div className="p-6 flex flex-col md:flex-row justify-between gap-6">
-              <div className="space-y-4 text-gray-800">
-                <p className="text-xl">
-                  <b>Application No:</b>{" "}
-                  <span className="text-pink-600 font-bold">{appNumber}</span>
+          {/* STEP 2: DOCUMENT UPLOAD */}
+          {step === 2 && (
+            <div className="space-y-6 animate-fadeIn">
+              <h2 className="text-xl font-bold text-pink-600 border-b pb-2">
+                Document Upload
+              </h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <FileUpload
+                  label="Aadhaar Card (Max 200KB)"
+                  name="aadhaar_card"
+                  onChange={handleFileChange}
+                  error={fileErrors.aadhaar_card}
+                  file={files.aadhaar_card}
+                />
+                <FileUpload
+                  label="Marksheet (Max 200KB)"
+                  name="marksheet"
+                  onChange={handleFileChange}
+                  error={fileErrors.marksheet}
+                  file={files.marksheet}
+                />
+                <FileUpload
+                  label="Student Photo (Max 20KB)"
+                  name="photo"
+                  onChange={handleFileChange}
+                  error={fileErrors.photo}
+                  file={files.photo}
+                />
+                <FileUpload
+                  label="Signature (Max 20KB)"
+                  name="signature"
+                  onChange={handleFileChange}
+                  error={fileErrors.signature}
+                  file={files.signature}
+                />
+              </div>
+              <div className="flex gap-4 pt-6">
+                <button
+                  onClick={prevStep}
+                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
+                >
+                  Back
+                </button>
+                <button
+                  disabled={
+                    Object.values(fileErrors).some((e) => e !== "") ||
+                    !files.photo ||
+                    !files.aadhaar_card
+                  }
+                  onClick={nextStep}
+                  className="bg-pink-600 text-white px-8 py-2 rounded-lg font-bold disabled:bg-gray-300"
+                >
+                  Next: Preview
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3 & 4 (Preview & Submit) */}
+          {step === 3 && (
+            <div className="space-y-4 animate-fadeIn">
+              <h2 className="text-xl font-bold text-pink-600">
+                Review Application
+              </h2>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2 border">
+                <p>
+                  <b>Name:</b> {formData.full_name}
                 </p>
                 <p>
-                  <b>Student Name:</b> {formData.full_name}
-                </p>
-                <p>
-                  <b>Father's Name:</b> {formData.father_name}
+                  <b>Father:</b> {formData.father_name}
                 </p>
                 <p>
                   <b>Class:</b> {formData.class_applied}
                 </p>
                 <p>
-                  <b>DOB:</b> {formData.dob}
+                  <b>Phone:</b> {formData.phone}
                 </p>
               </div>
-
-              <div className="flex flex-col items-center gap-4">
-                {files.photo && (
-                  <img
-                    src={URL.createObjectURL(files.photo)}
-                    className="w-32 h-40 border-2 border-gray-300 object-cover"
-                    alt="Student"
-                  />
-                )}
-                {files.signature && (
-                  <img
-                    src={URL.createObjectURL(files.signature)}
-                    className="w-32 h-10 object-contain border-b border-gray-400"
-                    alt="Sign"
-                  />
-                )}
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={prevStep}
+                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={nextStep}
+                  className="bg-pink-600 text-white px-8 py-2 rounded-lg font-bold"
+                >
+                  Proceed to Submit
+                </button>
               </div>
             </div>
+          )}
 
-            <div className="p-4 bg-gray-50 text-[12px] text-gray-600 italic border-t">
-              * Note: This is a provisional registration form. Please visit GSSS
-              Kuthar with original documents and ₹10 fee for final admission.
-            </div>
+          {step === 4 && (
+            <div className="text-center py-10 animate-fadeIn">
+              <h2 className="text-2xl font-bold text-pink-600 mb-4">
+                Ready to Submit?
+              </h2>
 
-            <div className="p-6 no-print flex gap-4">
-              <button
-                onClick={() => window.print()}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg w-full"
-              >
-                Print / Save PDF
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-gray-200 px-6 py-2 rounded-lg w-full"
-              >
-                Close
-              </button>
+              {/* --- NAYA USER FRIENDLY ERROR BOX --- */}
+              {submissionError && (
+                <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded shadow-sm animate-shake">
+                  <div className="flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="font-bold">Error:</span>
+                  </div>
+                  <p className="mt-1 text-left ml-7">{submissionError}</p>
+                </div>
+              )}
+
+              <p className="text-gray-600 mb-8">
+                Ensure all details are correct. You won't be able to edit after
+                submission.
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={prevStep}
+                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={finalSubmit}
+                  disabled={loading}
+                  className="bg-green-600 text-white px-10 py-2 rounded-lg font-bold shadow-lg"
+                >
+                  {loading ? "Submitting..." : "Confirm & Submit Now"}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* STEP 5: FINAL RECEIPT */}
+          {step === 5 && (
+            <div
+              id="printable-area"
+              className="border-2 border-pink-600 rounded-xl overflow-hidden shadow-2xl animate-bounceIn"
+            >
+              <div className="bg-pink-600 text-white p-6 text-center">
+                <h2 className="text-xl md:text-2xl font-bold uppercase">
+                  GSSS KUTHAR - Registration Receipt
+                </h2>
+                <p>Session 2026-2027</p>
+              </div>
+              <div className="p-8 flex flex-col md:flex-row justify-between gap-8">
+                <div className="space-y-4">
+                  <p className="text-2xl font-black text-pink-600">
+                    No: {appNumber}
+                  </p>
+                  <p>
+                    <b>Student:</b> {formData.full_name}
+                  </p>
+                  <p>
+                    <b>Father:</b> {formData.father_name}
+                  </p>
+                  <p>
+                    <b>Class:</b> {formData.class_applied}
+                  </p>
+                  <p>
+                    <b>DOB:</b> {formData.dob}
+                  </p>
+                </div>
+                <div className="flex flex-col items-center gap-4 bg-white p-2 border rounded shadow-sm">
+                  {files.photo && (
+                    <img
+                      src={URL.createObjectURL(files.photo)}
+                      className="w-32 h-40 object-cover border-2 border-pink-100"
+                      alt="Student"
+                    />
+                  )}
+                  {files.signature && (
+                    <img
+                      src={URL.createObjectURL(files.signature)}
+                      className="w-32 h-10 object-contain border-b-2"
+                      alt="Sign"
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="p-6 bg-yellow-50 text-xs italic text-gray-700 border-t">
+                * Note: This is a provisional receipt. Visit school office with
+                original docs and ₹10 fee.
+              </div>
+              <div className="p-6 flex gap-4 no-print">
+                <button
+                  onClick={() => window.print()}
+                  className="bg-blue-600 text-white py-3 rounded-lg w-full font-bold"
+                >
+                  Print / Save PDF
+                </button>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-gray-200 py-3 rounded-lg w-full font-bold"
+                >
+                  New Form
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -331,20 +331,20 @@ export default function Navbar() {
             Gallery
           </Link>
 
-          <a
-            href="#"
+          <Link
+            to="/contact"
             className="block border-b pb-2 text-pink-900 hover:text-pink-600 transition"
           >
             Contact
-          </a>
+          </Link>
 
           <div className="pt-4">
-            <a
-              href="/apply"
+            <Link
+              to="/apply-now"
               className="block w-full text-center bg-pink-600 text-white py-3 rounded-lg shadow-md hover:bg-pink-700 hover:shadow-lg transition"
             >
               Apply Now
-            </a>
+            </Link>
           </div>
         </div>
       </div>

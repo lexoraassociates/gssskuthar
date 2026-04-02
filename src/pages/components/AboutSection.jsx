@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 export default function AboutSection() {
   return (
     <section className="py-20 bg-gray-50">
@@ -33,12 +34,12 @@ export default function AboutSection() {
             and a strong academic foundation to ensure all‑round growth.
           </p>
 
-          <a
-            href="/apply"
+          <Link
+            to="/apply-now"
             className="inline-block mt-8 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-lg transition"
           >
             Apply for Admission
-          </a>
+          </Link>
         </div>
       </div>
     </section>
