@@ -102,11 +102,21 @@ export default function Navbar() {
                       About Us
                     </h3>
                     <ul className="space-y-3 text-sm text-gray-600">
-                      <li className="hover:text-blue-600 whitespace-nowrap">
-                        History
+                      <li>
+                        <Link
+                          to="/school/history"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          History
+                        </Link>
                       </li>
-                      <li className="hover:text-blue-600 whitespace-nowrap">
-                        Vision & Mission
+                      <li>
+                        <Link
+                          to="/school/vision-mission"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          Vision & Mission
+                        </Link>
                       </li>
                     </ul>
                   </div>
@@ -117,11 +127,21 @@ export default function Navbar() {
                       Academics
                     </h3>
                     <ul className="space-y-3 text-sm text-gray-600">
-                      <li className="hover:text-blue-600 whitespace-nowrap">
-                        Staff Details
+                      <li>
+                        <Link
+                          to="/school/staff"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          Staff Details
+                        </Link>
                       </li>
-                      <li className="hover:text-blue-600 whitespace-nowrap">
-                        Timings
+                      <li>
+                        <Link
+                          to="/school/timings"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          Timings
+                        </Link>
                       </li>
                     </ul>
                   </div>
@@ -132,12 +152,31 @@ export default function Navbar() {
                       Admissions
                     </h3>
                     <ul className="space-y-3 text-sm text-gray-600">
-                      <li className="hover:text-blue-600 whitespace-nowrap">
-                        Apply Online
+                      <li>
+                        <Link
+                          to="/apply-now"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          Apply Online
+                        </Link>
                       </li>
-                      <li className="hover:text-blue-600 whitespace-nowrap">
-                        Prospectus
+                      <li>
+                        <Link
+                          to="/school/prospectus"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          Prospectus
+                        </Link>
                       </li>
+                      {/* <li>
+                        <a
+                          href="/prospectus.pdf"
+                          target="_blank"
+                          className="hover:text-blue-600 whitespace-nowrap block"
+                        >
+                          Prospectus
+                        </a>
+                      </li> */}
                     </ul>
                   </div>
                 </div>

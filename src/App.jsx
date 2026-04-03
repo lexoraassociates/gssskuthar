@@ -15,6 +15,11 @@ import AdmissionForm from "./pages/AdmissionForm";
 import ManageGallery from "./pages/ManageGallery";
 import ManageNotifications from "./pages/components/ManageNotifications";
 import AllNotifications from "./pages/AllNotifications";
+import History from "./pages/school/History";
+import VisionMission from "./pages/school/VisionMission";
+import StaffDetails from "./pages/school/StaffDetails";
+import Timings from "./pages/school/Timings";
+import Prospectus from "./pages/school/Prospectus";
 
 // 1. ScrollToTop ko import karein
 import ScrollToTop from "./pages/components/ScrollToTop";
@@ -52,6 +57,11 @@ export default function App() {
           <Route path="/apply-now" element={<AdmissionForm />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/all-notifications" element={<AllNotifications />} />
+          <Route path="/school/history" element={<History />} />
+          <Route path="/school/vision-mission" element={<VisionMission />} />
+          <Route path="/school/staff" element={<StaffDetails />} />
+          <Route path="/school/timings" element={<Timings />} />
+          <Route path="/school/prospectus" element={<Prospectus />} />
 
           {/* PROTECTED DASHBOARD ROUTES */}
           <Route
