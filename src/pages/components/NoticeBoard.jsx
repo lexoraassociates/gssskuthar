@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 export default function NoticeBoard() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false); // Hover state track karne ke liye
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -14,16 +15,11 @@ export default function NoticeBoard() {
         );
         if (res.ok) {
           const data = await res.json();
-
-          // Check karein ki data array hai ya nahi
           const dataArray = Array.isArray(data) ? data : data.results || [];
 
           if (dataArray.length > 0) {
-            // Latest first aur sirf 10
             const latestTen = dataArray.slice(0, 10);
             setNotices(latestTen);
-          } else {
-            console.log("Database se khali array aaya");
           }
         }
       } catch (err) {
@@ -38,7 +34,6 @@ export default function NoticeBoard() {
   return (
     <section className="py-16 bg-gradient-to-b from-white to-blue-50">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Heading Section */}
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-black text-blue-900 tracking-tight">
             Digital Notice Board
@@ -49,9 +44,7 @@ export default function NoticeBoard() {
           </p>
         </div>
 
-        {/* Main Container */}
         <div className="bg-white border border-blue-100 rounded-3xl shadow-2xl shadow-blue-100/50 overflow-hidden max-w-4xl mx-auto">
-          {/* Header Bar */}
           <div className="bg-blue-600 p-5 flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <FaBullhorn className="text-2xl animate-pulse" />
@@ -65,20 +58,27 @@ export default function NoticeBoard() {
             </Link>
           </div>
 
-          {/* Scrolling Area */}
           <div className="p-4 relative">
-            <div className="h-64 overflow-hidden relative rounded-xl">
+            <div
+              className="h-64 overflow-hidden relative rounded-xl"
+              onMouseEnter={() => setIsPaused(true)} // Mouse aane par true
+              onMouseLeave={() => setIsPaused(false)} // Mouse hatne par false
+            >
               {loading ? (
                 <div className="flex items-center justify-center h-full text-blue-600 font-bold">
                   Loading Notices...
                 </div>
               ) : (
-                // group-hover:[animation-play-state:paused] mouse le jane par scroll rok dega
-                <div className="animate-scroll-slow space-y-4 py-2 group hover:[animation-play-state:paused]">
-                  {notices.map((item) => (
+                <div
+                  className="animate-scroll-slow space-y-4 py-2 cursor-pointer"
+                  style={{
+                    animationPlayState: isPaused ? "paused" : "running", // Inline style logic
+                  }}
+                >
+                  {[...notices, ...notices].map((item, index) => (
                     <div
-                      key={item.id}
-                      className="bg-blue-50/50 hover:bg-blue-50 p-5 rounded-2xl border border-blue-100/50 transition-all flex flex-col md:flex-row justify-between md:items-center gap-2 group/item"
+                      key={`${item.id}-${index}`}
+                      className="bg-blue-50/50 hover:bg-blue-50 p-5 rounded-2xl border border-blue-100/50 transition-all flex flex-col md:flex-row justify-between md:items-center gap-2"
                     >
                       <div className="flex gap-3 items-start">
                         <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-600 flex-shrink-0"></span>
@@ -96,7 +96,6 @@ export default function NoticeBoard() {
                     </div>
                   ))}
 
-                  {/* Agar notice kam hain toh "End of Board" message */}
                   {notices.length === 0 && (
                     <p className="text-center text-gray-400 py-10">
                       No active notices at the moment.
@@ -107,27 +106,25 @@ export default function NoticeBoard() {
             </div>
           </div>
 
-          {/* Footer Link */}
           <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
             <Link
               to="/all-notifications"
-              className="inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors group"
+              className="inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors"
             >
               View All Notifications
-              <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform" />
+              <FaArrowRight className="text-sm" />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Tailwind Custom Animation Styles */}
       <style>{`
         @keyframes scroll-slow {
           0% { transform: translateY(0); }
           100% { transform: translateY(-50%); }
         }
         .animate-scroll-slow {
-          animation: scroll-slow 20s linear infinite;
+          animation: scroll-slow 25s linear infinite;
         }
       `}</style>
     </section>

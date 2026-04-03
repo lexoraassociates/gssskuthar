@@ -7,17 +7,26 @@ import {
 } from "react-icons/fa";
 
 export default function Gallery() {
-  const [dbImages, setDbImages] = useState([]); // Database se aayi original images
-  const [displayImages, setDisplayImages] = useState([]); // UI mein dikhne waali (Repeated if needed)
+  const [dbImages, setDbImages] = useState([]);
+  const [displayImages, setDisplayImages] = useState([]);
   const [categories, setCategories] = useState(["All"]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  const [visibleCount, setVisibleCount] = useState(12); // Initial visible
+  const [visibleCount, setVisibleCount] = useState(12);
   const [selectedImage, setSelectedImage] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const loaderRef = useRef(null);
+
+  // Helper function to fix Image URLs
+  const getFullImageUrl = (path) => {
+    if (!path) return "";
+    // Agar URL already full hai (http se shuru ho raha hai) toh wahi rakho
+    if (path.startsWith("http")) return path;
+    // Warna domain add karo (dhyan rahe slash double na ho jaye)
+    return `https://test9.online${path.startsWith("/") ? "" : "/"}${path}`;
+  };
 
   // 1. Fetch Data from Backend
   useEffect(() => {
@@ -28,7 +37,6 @@ export default function Gallery() {
           const data = await res.json();
           setDbImages(data);
 
-          // Unique Categories nikalna (Database se)
           const cats = ["All", ...new Set(data.map((img) => img.category))];
           setCategories(cats);
         }
@@ -52,19 +60,18 @@ export default function Gallery() {
 
     if (filtered.length > 0) {
       if (filtered.length < 40) {
-        // Agar 40 se kam hain, to repeat karke kam se kam 60 banao
+        // Kam se kam 60 images dikhane ka logic
         while (finalDisplay.length < 60) {
           finalDisplay = [...finalDisplay, ...filtered];
         }
-        finalDisplay = finalDisplay.slice(0, 60); // Exact 60 par kaat do
+        finalDisplay = finalDisplay.slice(0, 60);
       } else {
-        // Agar 40 ya usse zyada hain, to repeat nahi karna
         finalDisplay = filtered;
       }
     }
 
     setDisplayImages(finalDisplay);
-    setVisibleCount(12); // Reset scroll count
+    setVisibleCount(12);
   }, [dbImages, activeCategory]);
 
   // 3. Infinite Scroll
@@ -82,7 +89,7 @@ export default function Gallery() {
   }, [visibleCount, displayImages]);
 
   const openLightbox = (index) => {
-    setSelectedImage(displayImages[index].image);
+    setSelectedImage(getFullImageUrl(displayImages[index].image));
     setCurrentIndex(index);
   };
 
@@ -100,13 +107,13 @@ export default function Gallery() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Title Section */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-blue-900 mb-4 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-black text-blue-900 mb-4 tracking-tight text-shadow-sm">
             Our School Life
           </h2>
-          <div className="h-1.5 w-20 bg-blue-600 mx-auto rounded-full mb-6"></div>
-          <p className="text-gray-500 max-w-2xl mx-auto text-lg font-medium">
-            Moments captured at GSSS Kuthar - From sports to academic
-            excellence.
+          <div className="h-1.5 w-20 bg-blue-600 mx-auto rounded-full mb-6 shadow-md"></div>
+          <p className="text-gray-500 max-w-2xl mx-auto text-lg font-medium italic">
+            "Capturing the vibrant moments of GSSS Kuthar - Where memories are
+            made."
           </p>
         </div>
 
@@ -116,7 +123,7 @@ export default function Gallery() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-8 py-2.5 rounded-2xl font-bold transition-all duration-300 transform active:scale-95 ${
+              className={`px-8 py-2.5 rounded-2xl font-bold transition-all duration-300 transform active:scale-95 shadow-sm ${
                 activeCategory === cat
                   ? "bg-blue-600 text-white shadow-xl shadow-blue-200 -translate-y-1"
                   : "bg-white text-gray-600 hover:bg-blue-50 border border-gray-100"
@@ -131,24 +138,26 @@ export default function Gallery() {
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
           {displayImages.slice(0, visibleCount).map((img, index) => (
             <div
-              key={index}
+              key={`${img.id}-${index}`}
               onClick={() => openLightbox(index)}
-              className="relative group overflow-hidden rounded-[2rem] bg-white border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+              className="relative group overflow-hidden rounded-[2.5rem] bg-white border-4 border-white shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer"
             >
               <img
-                src={img.image}
+                src={getFullImageUrl(img.image)}
                 alt={img.title}
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1"
+                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-2"
                 loading="lazy"
               />
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
-                <span className="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">
+              {/* Hover Overlay - Beautified */}
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
+                <span className="text-blue-300 text-xs font-black uppercase tracking-[0.2em] mb-2 drop-shadow-md">
                   {img.category}
                 </span>
-                <h4 className="text-white font-bold text-xl">{img.title}</h4>
-                <div className="mt-4 h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white">
-                  <FaExpand />
+                <h4 className="text-white font-black text-2xl mb-4 tracking-tight drop-shadow-lg">
+                  {img.title}
+                </h4>
+                <div className="h-12 w-12 bg-white/20 backdrop-blur-lg border border-white/30 rounded-full flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110">
+                  <FaExpand size={18} />
                 </div>
               </div>
             </div>
@@ -158,47 +167,54 @@ export default function Gallery() {
         {/* Scroll Sentinel */}
         {visibleCount < displayImages.length && (
           <div ref={loaderRef} className="py-20 text-center">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent shadow-lg"></div>
+            <p className="mt-4 text-blue-600 font-bold animate-pulse uppercase tracking-widest text-xs">
+              Discovering More Moments
+            </p>
           </div>
         )}
 
         {/* Modern Lightbox */}
         {selectedImage && (
-          <div className="fixed inset-0 bg-blue-950/95 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+          <div className="fixed inset-0 bg-blue-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4 transition-all duration-500">
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-8 right-8 text-white/50 hover:text-white text-3xl transition-colors"
+              className="absolute top-8 right-8 text-white/50 hover:text-white text-4xl transition-all hover:rotate-90 p-2"
             >
               <FaTimes />
             </button>
 
-            <img
-              src={selectedImage}
-              className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl border-4 border-white/10 object-contain animate-zoomIn"
-            />
+            <div className="relative max-w-5xl w-full flex items-center justify-center group/lightbox">
+              <img
+                src={selectedImage}
+                className="max-w-full max-h-[80vh] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-8 border-white/5 object-contain animate-zoomIn"
+                alt="Full resolution"
+              />
+            </div>
 
-            <div className="absolute bottom-10 flex gap-6">
+            {/* Navigation Controls */}
+            <div className="absolute bottom-12 flex gap-8">
               <button
                 onClick={() => {
                   const idx =
                     (currentIndex - 1 + displayImages.length) %
                     displayImages.length;
-                  setSelectedImage(displayImages[idx].image);
+                  setSelectedImage(getFullImageUrl(displayImages[idx].image));
                   setCurrentIndex(idx);
                 }}
-                className="h-14 w-14 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all"
+                className="h-16 w-16 rounded-2xl bg-white/5 hover:bg-blue-600 text-white flex items-center justify-center backdrop-blur-xl border border-white/10 transition-all hover:shadow-2xl hover:shadow-blue-500/20 active:scale-90"
               >
-                <FaChevronLeft size={24} />
+                <FaChevronLeft size={28} />
               </button>
               <button
                 onClick={() => {
                   const idx = (currentIndex + 1) % displayImages.length;
-                  setSelectedImage(displayImages[idx].image);
+                  setSelectedImage(getFullImageUrl(displayImages[idx].image));
                   setCurrentIndex(idx);
                 }}
-                className="h-14 w-14 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all"
+                className="h-16 w-16 rounded-2xl bg-white/5 hover:bg-blue-600 text-white flex items-center justify-center backdrop-blur-xl border border-white/10 transition-all hover:shadow-2xl hover:shadow-blue-500/20 active:scale-90"
               >
-                <FaChevronRight size={24} />
+                <FaChevronRight size={28} />
               </button>
             </div>
           </div>
@@ -207,10 +223,11 @@ export default function Gallery() {
 
       <style>{`
         @keyframes zoomIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
+          from { opacity: 0; transform: scale(0.95) translateY(20px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .animate-zoomIn { animation: zoomIn 0.3s ease-out forwards; }
+        .animate-zoomIn { animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .text-shadow-sm { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
       `}</style>
     </section>
   );
