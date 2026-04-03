@@ -13,10 +13,10 @@ export default function Home() {
       <PopupVideo />
       <Hero />
       <AboutSection />
+      <NoticeBoard />
       <VisionMission />
       <Achievements />
       <GalleryPreview />
-      <NoticeBoard />
       <PrincipalMessage />
     </>
   );

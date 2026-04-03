@@ -1,96 +1,135 @@
-import { FaBullhorn } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaBullhorn, FaArrowRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function NoticeBoard() {
-  const notices = [
-    {
-      id: 1,
-      text: "Annual Examination will start from 3rd March 2026.",
-      date: "10 Feb 2026",
-    },
-    {
-      id: 2,
-      text: "PTM for all classes scheduled on 28th February.",
-      date: "08 Feb 2026",
-    },
-    {
-      id: 3,
-      text: "New admission forms are now available online.",
-      date: "01 Feb 2026",
-    },
-    {
-      id: 4,
-      text: "School will remain closed on 26th Jan (Republic Day).",
-      date: "20 Jan 2026",
-    },
-    {
-      id: 5,
-      text: "School Annual result will be declared on 31st March 2026.",
-      date: "28 March 2026",
-    },
-    {
-      id: 6,
-      text: "New Session will start from 1st April 2026. English Medium will be started from class 6th.",
-      date: "28 March 2026",
-    },
-    {
-      id: 7,
-      text: "",
-      date: "",
-    },
-    {
-      id: 7,
-      text: "",
-      date: "",
-    },
-  ];
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        const res = await fetch(
+          "https://test9.online/api/management/notifications/",
+        );
+        if (res.ok) {
+          const data = await res.json();
+
+          // Check karein ki data array hai ya nahi
+          const dataArray = Array.isArray(data) ? data : data.results || [];
+
+          if (dataArray.length > 0) {
+            // Latest first aur sirf 10
+            const latestTen = dataArray.slice(0, 10);
+            setNotices(latestTen);
+          } else {
+            console.log("Database se khali array aaya");
+          }
+        }
+      } catch (err) {
+        console.error("Notice fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotices();
+  }, []);
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Heading */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-blue-700">
-            Notice Board
+    <section className="py-16 bg-gradient-to-b from-white to-blue-50">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Heading Section */}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-black text-blue-900 tracking-tight">
+            Digital Notice Board
           </h2>
-          <p className="text-gray-600 mt-2 text-lg">
-            Latest updates and important announcements
+          <div className="h-1.5 w-24 bg-blue-600 mx-auto mt-3 rounded-full"></div>
+          <p className="text-gray-500 mt-4 text-lg font-medium">
+            Stay updated with school announcements and events.
           </p>
         </div>
 
-        {/* Notice Board Box */}
-        <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg shadow p-6 max-w-4xl mx-auto">
-          {/* Icon */}
-          <div className="flex items-center gap-3 mb-4">
-            <FaBullhorn className="text-blue-600 text-3xl" />
-            <h3 className="text-2xl font-bold text-blue-700">Latest Notices</h3>
+        {/* Main Container */}
+        <div className="bg-white border border-blue-100 rounded-3xl shadow-2xl shadow-blue-100/50 overflow-hidden max-w-4xl mx-auto">
+          {/* Header Bar */}
+          <div className="bg-blue-600 p-5 flex items-center justify-between text-white">
+            <div className="flex items-center gap-3">
+              <FaBullhorn className="text-2xl animate-pulse" />
+              <h3 className="text-xl font-bold">Latest Updates</h3>
+            </div>
             <Link
               to="/apply-now"
-              className="ml-auto text-sm text-blue-600 font-semibold"
+              className="hidden md:block text-xs bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full font-bold transition-all"
             >
-              {" "}
-              Admissions Open from class 6-12(01-04-2026 to 10-04-2026)
+              Admissions Open 2026-27 🎓
             </Link>
           </div>
 
-          {/* Scrolling Notices */}
-          <div className="overflow-hidden h-40 relative">
-            <div className="animate-scroll space-y-4 group group-hover:[animation-play-state:paused]">
-              {[...notices].reverse().map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white p-4 rounded-lg shadow flex justify-between items-center animate-fadeSlideSlow"
-                >
-                  <p className="text-gray-700 font-medium">{item.text}</p>
-                  <span className="text-sm text-blue-600 font-semibold">
-                    {item.date}
-                  </span>
+          {/* Scrolling Area */}
+          <div className="p-4 relative">
+            <div className="h-64 overflow-hidden relative rounded-xl">
+              {loading ? (
+                <div className="flex items-center justify-center h-full text-blue-600 font-bold">
+                  Loading Notices...
                 </div>
-              ))}
+              ) : (
+                // group-hover:[animation-play-state:paused] mouse le jane par scroll rok dega
+                <div className="animate-scroll-slow space-y-4 py-2 group hover:[animation-play-state:paused]">
+                  {notices.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-blue-50/50 hover:bg-blue-50 p-5 rounded-2xl border border-blue-100/50 transition-all flex flex-col md:flex-row justify-between md:items-center gap-2 group/item"
+                    >
+                      <div className="flex gap-3 items-start">
+                        <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-600 flex-shrink-0"></span>
+                        <p className="text-gray-700 font-semibold leading-relaxed">
+                          {item.heading}
+                        </p>
+                      </div>
+                      <span className="text-[11px] uppercase tracking-widest text-blue-600 font-black bg-blue-100 px-3 py-1 rounded-full w-fit">
+                        {new Date(item.event_date).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Agar notice kam hain toh "End of Board" message */}
+                  {notices.length === 0 && (
+                    <p className="text-center text-gray-400 py-10">
+                      No active notices at the moment.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
+          </div>
+
+          {/* Footer Link */}
+          <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
+            <Link
+              to="/all-notifications"
+              className="inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors group"
+            >
+              View All Notifications
+              <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </div>
+
+      {/* Tailwind Custom Animation Styles */}
+      <style>{`
+        @keyframes scroll-slow {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        .animate-scroll-slow {
+          animation: scroll-slow 20s linear infinite;
+        }
+      `}</style>
     </section>
   );
 }

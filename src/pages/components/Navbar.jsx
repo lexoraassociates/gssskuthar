@@ -162,6 +162,23 @@ export default function Navbar() {
 
           <li
             className={`relative group cursor-pointer group-hover:-translate-y-[2px] transition-transform duration-200 ${
+              pathname === "/all-notifications"
+                ? "text-pink-700 font-semibold"
+                : "text-pink-900"
+            }`}
+          >
+            <Link to="/all-notifications">Notifications</Link>
+            <span
+              className={`absolute left-0 -bottom-1 h-[2px] bg-pink-600 rounded-full transition-all duration-300 ${
+                pathname === "/all-notifications"
+                  ? "w-full"
+                  : "w-0 group-hover:w-full"
+              }`}
+            ></span>
+          </li>
+
+          <li
+            className={`relative group cursor-pointer group-hover:-translate-y-[2px] transition-transform duration-200 ${
               pathname === "/contact"
                 ? "text-pink-700 font-semibold"
                 : "text-pink-900"

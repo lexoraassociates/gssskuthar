@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import FileUpload from "./components/fileUpload";
 
 export default function AdmissionForm() {
-  const [step, setStep] = useState(0); // 0 se shuru hoga (Instructions Screen)
+  const [step, setStep] = useState(0);
   const [appNumber, setAppNumber] = useState("");
   const [fileErrors, setFileErrors] = useState({});
-  const [isAgreed, setIsAgreed] = useState(false); // Checkbox ke liye
-  const [submissionError, setSubmissionError] = useState(null); // Backend error ke liye
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [submissionError, setSubmissionError] = useState(null);
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -24,12 +24,10 @@ export default function AdmissionForm() {
     photo: null,
     signature: null,
     marksheet: null,
-    roll_number_slip: null,
   });
 
   const [loading, setLoading] = useState(false);
 
-  // Pagination Logic
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
@@ -37,12 +35,17 @@ export default function AdmissionForm() {
   const isEmailValid = formData.email
     ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
     : true;
+
   const isStep1Valid =
-    Object.values(formData).every((val) => val !== "") &&
+    formData.full_name &&
+    formData.father_name &&
+    formData.dob &&
+    formData.gender &&
+    formData.class_applied &&
+    formData.address &&
     isPhoneValid &&
     isEmailValid;
 
-  // Scroll to Top on Step Change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
@@ -75,7 +78,7 @@ export default function AdmissionForm() {
 
   async function finalSubmit() {
     setLoading(true);
-    setSubmissionError(null); // Pehle purane error saaf karein
+    setSubmissionError(null);
     const data = new FormData();
     Object.keys(formData).forEach((key) => data.append(key, formData[key]));
     Object.keys(files).forEach((key) => {
@@ -93,19 +96,15 @@ export default function AdmissionForm() {
         setAppNumber(result.application_number);
         setStep(5);
       } else {
-        // Alert ki jagah hum state set karenge
         let errorMsg =
           result.error || "Submission Failed! Please check the details.";
-
         if (result.errors) {
-          // Agar multiple fields mein error hai (e.g., Email, Phone)
-          const fieldErrors = Object.entries(result.errors)
+          errorMsg = Object.entries(result.errors)
             .map(
               ([field, msgs]) =>
                 `${field.replace("_", " ").toUpperCase()}: ${msgs[0]}`,
             )
             .join(" | ");
-          errorMsg = fieldErrors;
         }
         setSubmissionError(errorMsg);
       }
@@ -119,251 +118,283 @@ export default function AdmissionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-pink-50 py-6 px-4 font-sans">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        {/* STEP 0: DETAILED INSTRUCTIONS */}
+    <div className="min-h-screen bg-slate-50 py-10 px-4 font-sans">
+      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+        {/* STEP 0: INSTRUCTIONS */}
         {step === 0 && (
-          <div className="p-8">
-            <div className="text-center mb-8 border-b-2 border-pink-100 pb-4">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-pink-700 uppercase">
-                GSSS Kuthar, Solan (H.P.)
+          <div className="p-8 md:p-12">
+            <div className="text-center mb-10">
+              <h1 className="text-3xl md:text-4xl font-black text-pink-600 uppercase tracking-tight">
+                GSSS Kuthar, Solan
               </h1>
-              <p className="text-gray-600 font-semibold mt-2">
-                General Instructions & Discipline Rules | सामान्य दिशा-निर्देश
+              <div className="h-1 w-20 bg-pink-500 mx-auto mt-2 rounded-full"></div>
+              <p className="text-gray-500 font-bold mt-4 text-lg">
+                Admission Portal | सत्र 2026-27
               </p>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 max-h-[60vh] overflow-y-auto mb-8 text-gray-800 leading-relaxed">
-              <section className="mb-6">
-                <h3 className="font-bold text-pink-600 text-lg border-b mb-3">
-                  1. General Discipline (सामान्य अनुशासन)
-                </h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>
-                    <b>Punctuality:</b> Arrive 15 mins before Assembly.
-                    (प्रार्थना सभा से 15 मिनट पूर्व पहुंचें।)
-                  </li>
-                  <li>
-                    <b>Uniform:</b> Clean uniform and ID card is mandatory. (साफ
-                    वर्दी और पहचान पत्र अनिवार्य है।)
-                  </li>
-                  <li>
-                    <b>Cleanliness:</b> Keep campus clean. (विद्यालय परिसर को
-                    साफ रखें।)
-                  </li>
-                  <li>
-                    <b>Property:</b> Do not damage school furniture/walls.
-                    (स्कूल की संपत्ति को नुकसान न पहुँचाएं।)
-                  </li>
-                </ul>
-              </section>
-
-              <section className="mb-6">
-                <h3 className="font-bold text-pink-600 text-lg border-b mb-3">
-                  2. Safety & Health (सुरक्षा और स्वास्थ्य)
-                </h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>
-                    <b>Prohibited Items:</b> No mobiles, smartwatches, or extra
-                    cash. (मोबाइल फोन या कीमती सामान न लाएं।)
-                  </li>
-                  <li>
-                    <b>Food:</b> Bring healthy home-cooked food and water. (घर
-                    का बना भोजन और पानी साथ लाएं।)
-                  </li>
-                </ul>
-              </section>
-
-              <section className="mb-6 bg-pink-50 p-4 rounded-lg border border-pink-200">
-                <h3 className="font-bold text-pink-800 text-lg mb-2">
-                  3. Documents Required (ज़रूरी दस्तावेज़)
-                </h3>
-                <div className="grid md:grid-cols-2 gap-2 text-sm">
-                  <p>• Aadhaar Card (&lt;200KB)</p>
-                  <p>• Student Photo (&lt;20KB)</p>
-                  <p>• Signature (&lt;20KB)</p>
-                  <p>• Previous Marksheet (&lt;200KB)</p>
-                </div>
-              </section>
+            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-8 overflow-y-auto max-h-96 custom-scrollbar">
+              <h3 className="font-bold text-gray-800 text-xl mb-4 flex items-center gap-2">
+                <span className="bg-pink-100 p-1 rounded">📋</span> Important
+                Instructions
+              </h3>
+              <ul className="space-y-3 text-gray-600 text-sm md:text-base">
+                <li className="flex gap-2">
+                  <b>1.</b> Form ko dhyan se bharen, submit ke baad badlav nahi
+                  hoga.
+                </li>
+                <li className="flex gap-2">
+                  <b>2.</b> Passport size photo (Max 20KB) taiyar rakhen.
+                </li>
+                <li className="flex gap-2">
+                  <b>3.</b> Aadhaar Card aur purani Marksheet (Max 200KB) upload
+                  karni hogi.
+                </li>
+                <li className="flex gap-2">
+                  <b>4.</b> Mobile number wahi dein jo chalu ho (Active Number).
+                </li>
+              </ul>
             </div>
 
-            <div className="flex flex-col items-center space-y-4">
-              <label className="flex items-center gap-3 cursor-pointer select-none">
+            <div className="flex flex-col items-center gap-6">
+              <label className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={isAgreed}
                   onChange={(e) => setIsAgreed(e.target.checked)}
-                  className="w-5 h-5 accent-pink-600"
+                  className="w-6 h-6 rounded accent-pink-600 cursor-pointer"
                 />
-                <span className="text-gray-700 text-sm md:text-base font-medium">
-                  I agree to follow all school rules. | मैं नियमों का पालन करने
-                  के लिए सहमत हूँ।
+                <span className="text-gray-700 font-medium group-hover:text-pink-600 transition-colors">
+                  I have read and I agree to the rules. | मैं सहमत हूँ।
                 </span>
               </label>
 
               <button
                 disabled={!isAgreed}
                 onClick={nextStep}
-                className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white text-lg font-bold py-3 px-12 rounded-full transition-all shadow-lg transform hover:scale-105 active:scale-95"
+                className="w-full md:w-auto bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white text-lg font-black py-4 px-16 rounded-2xl transition-all shadow-xl shadow-pink-100 active:scale-95"
               >
-                Proceed to Fill Form / फॉर्म भरें
+                START APPLICATION 🚀
               </button>
             </div>
           </div>
         )}
 
-        {/* PROGRESS BAR (Visible from Step 1 to 4) */}
+        {/* PROGRESS BAR */}
         {step >= 1 && step <= 4 && (
-          <div className="bg-pink-600 p-4 flex justify-around text-[10px] md:text-sm text-white font-bold uppercase tracking-wider">
-            <span className={step >= 1 ? "opacity-100" : "opacity-40"}>
-              1. Details
-            </span>
-            <span className={step >= 2 ? "opacity-100" : "opacity-40"}>
-              2. Docs
-            </span>
-            <span className={step >= 3 ? "opacity-100" : "opacity-40"}>
-              3. Preview
-            </span>
-            <span className={step >= 4 ? "opacity-100" : "opacity-40"}>
-              4. Submit
-            </span>
+          <div className="bg-pink-600 p-4 flex justify-between px-8 md:px-20">
+            {[1, 2, 3, 4].map((s) => (
+              <div
+                key={s}
+                className={`h-2 w-full mx-1 rounded-full ${step >= s ? "bg-white" : "bg-pink-800 opacity-50"}`}
+              ></div>
+            ))}
           </div>
         )}
 
-        <div className="p-8">
-          {/* STEP 1: BASIC DETAILS */}
+        <div className="p-8 md:p-10">
+          {/* STEP 1: STUDENT DETAILS */}
           {step === 1 && (
-            <div className="animate-fadeIn space-y-4">
-              <h2 className="text-xl font-bold text-pink-600 border-b pb-2">
-                Student Basic Details
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <input
-                  name="full_name"
-                  placeholder="Student Full Name"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500"
-                />
-                <input
-                  name="father_name"
-                  placeholder="Father's Name"
-                  value={formData.father_name}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500"
-                />
-                <input
-                  type="date"
-                  name="dob"
-                  value={formData.dob}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg"
-                />
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg"
-                >
-                  <option value="">Select Gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-                <input
-                  name="class_applied"
-                  placeholder="Class (e.g. 9th, 11th)"
-                  value={formData.class_applied}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg"
-                />
-                {/* Email Input Step 1 mein dhundhein aur uske niche ye line add karein */}
-                <input
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full p-3 border rounded-lg ${formData.email && !isEmailValid ? "border-red-500" : ""}`}
-                />
-                {/* Naya Error Message */}
-                {!isEmailValid && formData.email && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Please enter a valid email address (e.g. name@mail.com).
+            <div className="animate-fadeIn space-y-8">
+              <div className="border-l-4 border-pink-500 pl-4">
+                <h2 className="text-2xl font-black text-gray-800">
+                  Student Details
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Kripya saari jankari certificate ke anusar bharen.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Full Name */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">
+                    Student Full Name
+                  </label>
+                  <input
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50 font-medium"
+                    placeholder="Enter full name"
+                  />
+                </div>
+
+                {/* Father's Name */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">
+                    Father's Name
+                  </label>
+                  <input
+                    name="father_name"
+                    value={formData.father_name}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50 font-medium"
+                    placeholder="Father's full name"
+                  />
+                </div>
+
+                {/* DATE OF BIRTH (The Improved Input) */}
+                <div className="space-y-1">
+                  <label
+                    htmlFor="dob"
+                    className="text-xs font-bold text-gray-400 uppercase ml-1"
+                  >
+                    Date of Birth (DOB) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-pink-500">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      id="dob"
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleChange}
+                      max={new Date().toISOString().split("T")[0]}
+                      className="w-full pl-12 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50 font-bold text-gray-700"
+                    />
+                  </div>
+                  <p className="text-[10px] text-gray-400 ml-1 italic">
+                    Click on calendar to select birth date
                   </p>
-                )}
-                <div className="col-span-full">
+                </div>
+
+                {/* Gender */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">
+                    Gender
+                  </label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-pink-500 bg-gray-50 font-medium cursor-pointer"
+                  >
+                    <option value="">Select Gender</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                {/* Class */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">
+                    Admission For Class
+                  </label>
+                  <input
+                    name="class_applied"
+                    value={formData.class_applied}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-pink-500 bg-gray-50 font-medium"
+                    placeholder="e.g. 6th, 9th, 11th"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">
+                    Phone Number
+                  </label>
                   <input
                     name="phone"
-                    placeholder="Phone (10 digits)"
                     value={formData.phone}
                     onChange={handleChange}
-                    className={`w-full p-3 border rounded-lg ${formData.phone && !isPhoneValid ? "border-red-500" : ""}`}
+                    className={`w-full p-4 border rounded-2xl focus:ring-2 focus:ring-pink-500 bg-gray-50 font-bold ${formData.phone && !isPhoneValid ? "border-red-500" : "border-gray-200"}`}
+                    placeholder="10 digit mobile no."
                   />
-                  {!isPhoneValid && formData.phone && (
-                    <p className="text-red-500 text-xs mt-1">
-                      Please enter a valid 10-digit number.
-                    </p>
-                  )}
                 </div>
-                <textarea
-                  name="address"
-                  placeholder="Full Home Address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-lg col-span-full h-24"
-                ></textarea>
+
+                {/* Address */}
+                <div className="col-span-full space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">
+                    Permanent Address
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    rows="3"
+                    className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-pink-500 bg-gray-50 font-medium resize-none"
+                    placeholder="Village, PO, Tehsil, District..."
+                  ></textarea>
+                </div>
               </div>
+
               <button
                 disabled={!isStep1Valid}
                 onClick={nextStep}
-                className="bg-pink-600 text-white px-8 py-3 rounded-lg font-bold disabled:bg-gray-300 w-full md:w-auto"
+                className="w-full bg-pink-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-pink-100 disabled:bg-gray-200 active:scale-95 transition-all"
               >
-                Next Step
+                NEXT: UPLOAD DOCUMENTS →
               </button>
             </div>
           )}
 
-          {/* STEP 2: DOCUMENT UPLOAD */}
+          {/* STEP 2: DOCUMENTS */}
           {step === 2 && (
-            <div className="space-y-6 animate-fadeIn">
-              <h2 className="text-xl font-bold text-pink-600 border-b pb-2">
-                Document Upload
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-8 animate-fadeIn">
+              <div className="border-l-4 border-pink-500 pl-4">
+                <h2 className="text-2xl font-black text-gray-800">
+                  Document Upload
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Scan copy upload karein (JPG/PNG/PDF).
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
                 <FileUpload
-                  label="Aadhaar Card (Max 200KB)"
+                  label="Aadhaar Card (200KB)"
                   name="aadhaar_card"
                   onChange={handleFileChange}
                   error={fileErrors.aadhaar_card}
                   file={files.aadhaar_card}
                 />
                 <FileUpload
-                  label="Marksheet (Max 200KB)"
+                  label="Marksheet (200KB)"
                   name="marksheet"
                   onChange={handleFileChange}
                   error={fileErrors.marksheet}
                   file={files.marksheet}
                 />
                 <FileUpload
-                  label="Student Photo (Max 20KB)"
+                  label="Student Photo (20KB)"
                   name="photo"
                   onChange={handleFileChange}
                   error={fileErrors.photo}
                   file={files.photo}
                 />
                 <FileUpload
-                  label="Signature (Max 20KB)"
+                  label="Signature (20KB)"
                   name="signature"
                   onChange={handleFileChange}
                   error={fileErrors.signature}
                   file={files.signature}
                 />
               </div>
+
               <div className="flex gap-4 pt-6">
                 <button
                   onClick={prevStep}
-                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
+                  className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-colors"
                 >
-                  Back
+                  BACK
                 </button>
                 <button
                   disabled={
@@ -372,165 +403,171 @@ export default function AdmissionForm() {
                     !files.aadhaar_card
                   }
                   onClick={nextStep}
-                  className="bg-pink-600 text-white px-8 py-2 rounded-lg font-bold disabled:bg-gray-300"
+                  className="flex-[2] py-4 bg-pink-600 text-white rounded-2xl font-black shadow-lg disabled:bg-gray-200"
                 >
-                  Next: Preview
+                  REVIEW APPLICATION
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 3 & 4 (Preview & Submit) */}
+          {/* STEP 3: PREVIEW */}
           {step === 3 && (
-            <div className="space-y-4 animate-fadeIn">
-              <h2 className="text-xl font-bold text-pink-600">
-                Review Application
+            <div className="space-y-6 animate-fadeIn">
+              <h2 className="text-2xl font-black text-gray-800 border-b pb-4">
+                Application Preview
               </h2>
-              <div className="bg-gray-50 p-4 rounded-lg space-y-2 border">
-                <p>
-                  <b>Name:</b> {formData.full_name}
-                </p>
-                <p>
-                  <b>Father:</b> {formData.father_name}
-                </p>
-                <p>
-                  <b>Class:</b> {formData.class_applied}
-                </p>
-                <p>
-                  <b>Phone:</b> {formData.phone}
-                </p>
+              <div className="bg-slate-50 p-6 rounded-3xl grid grid-cols-2 gap-4 text-sm md:text-base border border-slate-100">
+                <div className="space-y-3">
+                  <p>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] block">
+                      Full Name
+                    </span>{" "}
+                    <span className="font-bold">{formData.full_name}</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] block">
+                      Father Name
+                    </span>{" "}
+                    <span className="font-bold">{formData.father_name}</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] block">
+                      Class
+                    </span>{" "}
+                    <span className="font-bold">{formData.class_applied}</span>
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <p>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] block">
+                      DOB
+                    </span>{" "}
+                    <span className="font-bold">{formData.dob}</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] block">
+                      Phone
+                    </span>{" "}
+                    <span className="font-bold">{formData.phone}</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] block">
+                      Gender
+                    </span>{" "}
+                    <span className="font-bold">{formData.gender}</span>
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-4 mt-6">
+
+              <div className="flex gap-4">
                 <button
                   onClick={prevStep}
-                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
+                  className="flex-1 py-4 bg-gray-100 font-bold rounded-2xl text-gray-500"
                 >
-                  Back
+                  EDIT DETAILS
                 </button>
                 <button
                   onClick={nextStep}
-                  className="bg-pink-600 text-white px-8 py-2 rounded-lg font-bold"
+                  className="flex-[2] py-4 bg-pink-600 text-white font-black rounded-2xl shadow-lg"
                 >
-                  Proceed to Submit
+                  FINAL SUBMISSION
                 </button>
               </div>
             </div>
           )}
 
+          {/* STEP 4: FINAL SUBMIT */}
           {step === 4 && (
-            <div className="text-center py-10 animate-fadeIn">
-              <h2 className="text-2xl font-bold text-pink-600 mb-4">
+            <div className="text-center py-10 animate-fadeIn space-y-6">
+              <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto text-4xl shadow-inner">
+                ✓
+              </div>
+              <h2 className="text-3xl font-black text-gray-800">
                 Ready to Submit?
               </h2>
 
-              {/* --- NAYA USER FRIENDLY ERROR BOX --- */}
               {submissionError && (
-                <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded shadow-sm animate-shake">
-                  <div className="flex items-center">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="font-bold">Error:</span>
-                  </div>
-                  <p className="mt-1 text-left ml-7">{submissionError}</p>
+                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm text-left rounded-r-xl animate-shake">
+                  <p className="font-bold">Error Occurred:</p>
+                  <p>{submissionError}</p>
                 </div>
               )}
 
-              <p className="text-gray-600 mb-8">
-                Ensure all details are correct. You won't be able to edit after
-                submission.
+              <p className="text-gray-500 max-w-sm mx-auto">
+                By clicking confirm, your application will be sent to GSSS
+                Kuthar for approval.
               </p>
-              <div className="flex justify-center gap-4">
+
+              <div className="flex justify-center gap-4 pt-4">
                 <button
                   onClick={prevStep}
-                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
+                  className="px-8 py-4 bg-gray-100 font-bold rounded-2xl text-gray-500"
                 >
-                  Back
+                  CANCEL
                 </button>
                 <button
                   onClick={finalSubmit}
                   disabled={loading}
-                  className="bg-green-600 text-white px-10 py-2 rounded-lg font-bold shadow-lg"
+                  className="px-12 py-4 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100"
                 >
-                  {loading ? "Submitting..." : "Confirm & Submit Now"}
+                  {loading ? "SUBMITTING..." : "CONFIRM & SUBMIT"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 5: FINAL RECEIPT */}
+          {/* STEP 5: RECEIPT */}
           {step === 5 && (
             <div
               id="printable-area"
-              className="border-2 border-pink-600 rounded-xl overflow-hidden shadow-2xl animate-bounceIn"
+              className="border-4 border-dashed border-pink-200 rounded-3xl p-8 bg-white animate-bounceIn text-center space-y-6"
             >
-              <div className="bg-pink-600 text-white p-6 text-center">
-                <h2 className="text-xl md:text-2xl font-bold uppercase">
-                  GSSS KUTHAR - Registration Receipt
-                </h2>
-                <p>Session 2026-2027</p>
+              <div className="space-y-2">
+                <h2 className="text-green-600 font-black text-4xl">SUCCESS!</h2>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
+                  Application Submitted Successfully
+                </p>
               </div>
-              <div className="p-8 flex flex-col md:flex-row justify-between gap-8">
-                <div className="space-y-4">
-                  <p className="text-2xl font-black text-pink-600">
-                    No: {appNumber}
-                  </p>
-                  <p>
-                    <b>Student:</b> {formData.full_name}
-                  </p>
-                  <p>
-                    <b>Father:</b> {formData.father_name}
-                  </p>
-                  <p>
-                    <b>Class:</b> {formData.class_applied}
-                  </p>
-                  <p>
-                    <b>DOB:</b> {formData.dob}
-                  </p>
-                </div>
-                <div className="flex flex-col items-center gap-4 bg-white p-2 border rounded shadow-sm">
-                  {files.photo && (
-                    <img
-                      src={URL.createObjectURL(files.photo)}
-                      className="w-32 h-40 object-cover border-2 border-pink-100"
-                      alt="Student"
-                    />
-                  )}
-                  {files.signature && (
-                    <img
-                      src={URL.createObjectURL(files.signature)}
-                      className="w-32 h-10 object-contain border-b-2"
-                      alt="Sign"
-                    />
-                  )}
-                </div>
+
+              <div className="bg-pink-50 py-6 rounded-2xl">
+                <p className="text-gray-500 text-sm font-bold">
+                  Application Number
+                </p>
+                <h3 className="text-4xl font-black text-pink-600">
+                  {appNumber}
+                </h3>
               </div>
-              <div className="p-6 bg-yellow-50 text-xs italic text-gray-700 border-t">
-                * Note: This is a provisional receipt. Visit school office with
-                original docs and ₹10 fee.
+
+              <div className="text-left space-y-2 border-t pt-6">
+                <p className="flex justify-between">
+                  <span>Student:</span> <b>{formData.full_name}</b>
+                </p>
+                <p className="flex justify-between">
+                  <span>Class:</span> <b>{formData.class_applied}</b>
+                </p>
+                <p className="flex justify-between">
+                  <span>Phone:</span> <b>{formData.phone}</b>
+                </p>
               </div>
-              <div className="p-6 flex gap-4 no-print">
+
+              <div className="flex gap-4 no-print pt-4">
                 <button
                   onClick={() => window.print()}
-                  className="bg-blue-600 text-white py-3 rounded-lg w-full font-bold"
+                  className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg"
                 >
-                  Print / Save PDF
+                  PRINT RECEIPT
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="bg-gray-200 py-3 rounded-lg w-full font-bold"
+                  className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold"
                 >
-                  New Form
+                  DONE
                 </button>
               </div>
+              <p className="text-[10px] text-gray-400 italic mt-4 no-print">
+                Take a screenshot or print this for future reference.
+              </p>
             </div>
           )}
         </div>

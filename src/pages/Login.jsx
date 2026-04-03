@@ -1,39 +1,119 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../auth/AuthContext";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
-  const { login } = useContext(AuthContext);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const submit = async (e) => {
+  // Session Expire wala check yahan aayega
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get("message") === "session_expired") {
+      setError("Your session has expired. Please login again.");
+    }
+  }, [location]);
+
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    await login(username, password);
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("https://test9.online/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Token aur User info save karein
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        localStorage.setItem("user_role", data.role);
+        localStorage.setItem("user_name", data.full_name || data.username);
+
+        // Role ke hisaab se redirect karein
+        if (data.role === "admin" || data.role === "superuser") {
+          navigate("/admin-dashboard");
+        } else if (data.role === "teacher") {
+          navigate("/teacher-dashboard");
+        } else {
+          navigate("/student-profile");
+        }
+      } else {
+        setError("Invalid Username or Password!");
+      }
+    } catch (err) {
+      setError("Server Connection Failed!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form onSubmit={submit} className="bg-white p-6 shadow-md rounded w-80">
-        <h2 className="text-xl font-bold mb-4">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-2xl">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-pink-600">GSSS Kuthar</h2>
+          <p className="text-gray-500 mt-2">Login to your account</p>
+        </div>
 
-        <input
-          type="text"
-          placeholder="Admission Number"
-          className="w-full border p-2 mb-3"
-          onChange={(e) => setUsername(e.target.value)}
-        />
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium border border-red-200">
+            {error}
+          </div>
+        )}
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border p-2 mb-3"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Username / Application No.
+            </label>
+            <input
+              type="text"
+              name="username"
+              required
+              className="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-pink-500 outline-none"
+              placeholder="Enter username"
+              onChange={handleChange}
+            />
+          </div>
 
-        <button className="w-full bg-blue-600 text-white p-2 rounded">
-          Login
-        </button>
-      </form>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              required
+              className="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-pink-500 outline-none"
+              placeholder="••••••••"
+              onChange={handleChange}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg transform hover:scale-[1.02] active:scale-95 disabled:bg-gray-400"
+          >
+            {loading ? "Authenticating..." : "Login Now"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
