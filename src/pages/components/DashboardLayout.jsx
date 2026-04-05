@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }) {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-3 rounded-2xl bg-gray-50 text-gray-500 hover:bg-pink-50 hover:text-pink-600 transition-all active:scale-90"
+              className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-pink-50 hover:text-pink-600 transition-all active:scale-90"
             >
               <FaBars size={20} />
             </button>
