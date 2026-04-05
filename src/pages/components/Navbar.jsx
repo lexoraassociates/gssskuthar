@@ -7,11 +7,13 @@ export default function Navbar() {
   const [megaOpen, setMegaOpen] = useState(false);
   const [activitiesOpen, setActivitiesOpen] = useState(false);
   const [mobileSchoolOpen, setMobileSchoolOpen] = useState(false);
-  const [mobileActivitiesOpen, setMobileActivitiesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const menuRef = useRef(null);
   const { pathname } = useLocation();
+
+  // Helper to check if a link is active
+  const isActive = (path) => pathname === path;
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function Navbar() {
                 <Link
                   to={path}
                   className={
-                    pathname === path
+                    isActive(path)
                       ? "text-pink-700"
                       : "text-pink-900 hover:text-pink-600 transition"
                   }
@@ -76,7 +78,7 @@ export default function Navbar() {
                   {item}
                 </Link>
                 <span
-                  className={`absolute left-0 bottom-0 h-0.5 bg-pink-600 transition-all duration-300 ${pathname === path ? "w-full" : "w-0 group-hover:w-full"}`}
+                  className={`absolute left-0 bottom-0 h-0.5 bg-pink-600 transition-all duration-300 ${isActive(path) ? "w-full" : "w-0 group-hover:w-full"}`}
                 ></span>
               </li>
             );
@@ -99,16 +101,17 @@ export default function Navbar() {
 
             {megaOpen && (
               <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-max z-50 animate-fadeSlideSlow">
-                <div className="bg-white/95 backdrop-blur-2xl shadow-2xl border border-pink-100 rounded-3xl p-8 grid grid-cols-3 gap-8">
+                <div className="bg-white/95 backdrop-blur-2xl shadow-2xl border border-pink-100 rounded-3xl p-8 grid grid-cols-3 gap-8 text-left">
+                  {/* Column 1 */}
                   <div>
                     <h3 className="font-black text-blue-700 mb-4 text-[10px] tracking-[0.2em] uppercase">
                       About Us
                     </h3>
-                    <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                    <ul className="space-y-2 text-sm text-gray-600 font-medium">
                       <li>
                         <Link
                           to="/school/history"
-                          className="hover:text-pink-600"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/school/history") ? "bg-pink-100 text-pink-700 font-bold" : "hover:text-pink-600 hover:bg-gray-50"}`}
                         >
                           History
                         </Link>
@@ -116,22 +119,23 @@ export default function Navbar() {
                       <li>
                         <Link
                           to="/school/vision-mission"
-                          className="hover:text-pink-600"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/school/vision-mission") ? "bg-pink-100 text-pink-700 font-bold" : "hover:text-pink-600 hover:bg-gray-50"}`}
                         >
                           Vision & Mission
                         </Link>
                       </li>
                     </ul>
                   </div>
+                  {/* Column 2 */}
                   <div>
                     <h3 className="font-black text-blue-700 mb-4 text-[10px] tracking-[0.2em] uppercase">
                       Academics
                     </h3>
-                    <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                    <ul className="space-y-2 text-sm text-gray-600 font-medium">
                       <li>
                         <Link
                           to="/school/staff"
-                          className="hover:text-pink-600"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/school/staff") ? "bg-pink-100 text-pink-700 font-bold" : "hover:text-pink-600 hover:bg-gray-50"}`}
                         >
                           Staff Details
                         </Link>
@@ -139,27 +143,39 @@ export default function Navbar() {
                       <li>
                         <Link
                           to="/school/timings"
-                          className="hover:text-pink-600"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/school/timings") ? "bg-pink-100 text-pink-700 font-bold" : "hover:text-pink-600 hover:bg-gray-50"}`}
                         >
                           Timings
                         </Link>
                       </li>
+                      <li>
+                        <Link
+                          to="/school/facilities"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/school/facilities") ? "bg-pink-50 text-blue-700 font-bold" : "text-pink-600 font-bold hover:bg-gray-50"}`}
+                        >
+                          Our Facilities ✨
+                        </Link>
+                      </li>
                     </ul>
                   </div>
+                  {/* Column 3 */}
                   <div>
                     <h3 className="font-black text-blue-700 mb-4 text-[10px] tracking-[0.2em] uppercase">
                       Admissions
                     </h3>
-                    <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                    <ul className="space-y-2 text-sm text-gray-600 font-medium">
                       <li>
-                        <Link to="/apply-now" className="hover:text-pink-600">
+                        <Link
+                          to="/apply-now"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/apply-now") ? "bg-pink-100 text-pink-700 font-bold" : "hover:text-pink-600 hover:bg-gray-50"}`}
+                        >
                           Apply Online
                         </Link>
                       </li>
                       <li>
                         <Link
                           to="/school/prospectus"
-                          className="hover:text-pink-600"
+                          className={`block px-3 py-1.5 rounded-lg transition ${isActive("/school/prospectus") ? "bg-pink-100 text-pink-700 font-bold" : "hover:text-pink-600 hover:bg-gray-50"}`}
                         >
                           Prospectus
                         </Link>
@@ -202,8 +218,11 @@ export default function Navbar() {
       <div
         className={`lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl shadow-2xl transition-all duration-500 overflow-hidden ${isOpen ? "max-h-[90vh] opacity-100 border-t border-pink-100" : "max-h-0 opacity-0"}`}
       >
-        <div className="px-6 py-8 space-y-5 font-bold text-gray-800">
-          <Link to="/" className="block text-lg border-b border-gray-50 pb-2">
+        <div className="px-6 py-8 space-y-5 font-bold text-gray-800 text-left">
+          <Link
+            to="/"
+            className={`block text-lg border-b border-gray-50 pb-2 ${isActive("/") ? "text-pink-600" : ""}`}
+          >
             Home
           </Link>
 
@@ -221,29 +240,45 @@ export default function Navbar() {
               )}
             </button>
             {mobileSchoolOpen && (
-              <div className="mt-4 grid grid-cols-2 gap-6 p-4 bg-pink-50/50 rounded-2xl animate-fadeIn">
+              <div className="mt-4 grid grid-cols-2 gap-6 p-4 bg-pink-50/50 rounded-2xl">
                 <div className="space-y-2 text-sm">
                   <p className="text-blue-700 text-[10px] uppercase tracking-widest font-black">
                     General
                   </p>
-                  <Link to="/school/history" className="block text-gray-600">
+                  <Link
+                    to="/school/history"
+                    className={`block ${isActive("/school/history") ? "text-pink-600" : "text-gray-600"}`}
+                  >
                     History
                   </Link>
                   <Link
                     to="/school/vision-mission"
-                    className="block text-gray-600"
+                    className={`block ${isActive("/school/vision-mission") ? "text-pink-600" : "text-gray-600"}`}
                   >
                     Vision
+                  </Link>
+                  {/* Facilities added to Mobile Menu */}
+                  <Link
+                    to="/school/facilities"
+                    className={`block ${isActive("/school/facilities") ? "text-pink-600 font-bold" : "text-gray-600 font-bold"}`}
+                  >
+                    Facilities ✨
                   </Link>
                 </div>
                 <div className="space-y-2 text-sm">
                   <p className="text-blue-700 text-[10px] uppercase tracking-widest font-black">
                     Faculty
                   </p>
-                  <Link to="/school/staff" className="block text-gray-600">
+                  <Link
+                    to="/school/staff"
+                    className={`block ${isActive("/school/staff") ? "text-pink-600" : "text-gray-600"}`}
+                  >
                     Staff
                   </Link>
-                  <Link to="/school/timings" className="block text-gray-600">
+                  <Link
+                    to="/school/timings"
+                    className={`block ${isActive("/school/timings") ? "text-pink-600" : "text-gray-600"}`}
+                  >
                     Timings
                   </Link>
                 </div>
@@ -252,10 +287,16 @@ export default function Navbar() {
                     Admission
                   </p>
                   <div className="flex gap-4">
-                    <Link to="/apply-now" className="text-gray-600">
+                    <Link
+                      to="/apply-now"
+                      className={`block ${isActive("/apply-now") ? "text-pink-600" : "text-gray-600"}`}
+                    >
                       Apply Online
                     </Link>
-                    <Link to="/school/prospectus" className="text-gray-600">
+                    <Link
+                      to="/school/prospectus"
+                      className={`block ${isActive("/school/prospectus") ? "text-pink-600" : "text-gray-600"}`}
+                    >
                       Prospectus
                     </Link>
                   </div>
@@ -266,13 +307,13 @@ export default function Navbar() {
 
           <Link
             to="/gallery"
-            className="block text-lg border-b border-gray-50 pb-2"
+            className={`block text-lg border-b border-gray-50 pb-2 ${isActive("/gallery") ? "text-pink-600" : ""}`}
           >
             Gallery
           </Link>
           <Link
             to="/contact"
-            className="block text-lg border-b border-gray-50 pb-2"
+            className={`block text-lg border-b border-gray-50 pb-2 ${isActive("/contact") ? "text-pink-600" : ""}`}
           >
             Contact
           </Link>

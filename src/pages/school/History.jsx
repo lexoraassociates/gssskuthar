@@ -23,14 +23,15 @@ export default function History() {
             </h2>
             <div className="space-y-4 text-gray-600 leading-relaxed text-lg">
               <p>
-                GSSS Kuthar ki neev Himachal Pradesh ke Solan zile mein ek aise
-                waqt mein rakhi gayi thi jab is kshetra mein gunvatta wali
-                shiksha (quality education) ki bahut kami thi.
+                राजकीय वरिष्ठ माध्यमिक पाठशाला कुठाड़ की नींव हिमाचल प्रदेश के
+                सोलन ज़िले में उस समय रखी गई थी, जब इस क्षेत्र में गुणवत्तापूर्ण
+                शिक्षा की बहुत कमी थी।
               </p>
               <p>
-                Ek chhote se kamre se shuru hua ye safar aaj ek vishal building
-                aur hazaron kamyab students ke saath aage badh raha hai. Hamara
-                school hamesha se hi sanskar aur shiksha ka sangam raha hai.
+                1960 के दशक में, एक छोटे से कमरे से शुरू हुआ यह विद्यालय आज एक
+                विशाल भवन और हजारों सफल विद्यार्थियों के साथ निरंतर आगे बढ़ रहा
+                है। हमारा विद्यालय हमेशा से ही संस्कार और शिक्षा का सुंदर संगम
+                रहा है।”
               </p>
             </div>
           </div>

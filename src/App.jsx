@@ -20,6 +20,7 @@ import VisionMission from "./pages/school/VisionMission";
 import StaffDetails from "./pages/school/StaffDetails";
 import Timings from "./pages/school/Timings";
 import Prospectus from "./pages/school/Prospectus";
+import Facilities from "./pages/school/Facilities";
 
 // 1. ScrollToTop ko import karein
 import ScrollToTop from "./pages/components/ScrollToTop";
@@ -56,12 +57,13 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/apply-now" element={<AdmissionForm />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/all-notifications" element={<AllNotifications />} />
+          <Route path="/notifications" element={<AllNotifications />} />
           <Route path="/school/history" element={<History />} />
           <Route path="/school/vision-mission" element={<VisionMission />} />
           <Route path="/school/staff" element={<StaffDetails />} />
           <Route path="/school/timings" element={<Timings />} />
           <Route path="/school/prospectus" element={<Prospectus />} />
+          <Route path="/school/facilities" element={<Facilities />} />
 
           {/* PROTECTED DASHBOARD ROUTES */}
           <Route
