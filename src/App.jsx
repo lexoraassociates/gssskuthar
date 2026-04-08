@@ -41,8 +41,6 @@ function LayoutWrapper({ children }) {
     "/management",
     "/profile",
     "/admin-dashboard",
-    "/teacher-dashboard", // Naya path
-    "/student-dashboard", // Naya path
     "/user/settings",
     "/admin/students",
   ];
