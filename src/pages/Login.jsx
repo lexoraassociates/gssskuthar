@@ -48,9 +48,9 @@ export default function Login() {
         if (data.role === "admin" || data.role === "superuser") {
           navigate("/admin-dashboard");
         } else if (data.role === "teacher") {
-          navigate("/teacher-dashboard");
-        } else {
-          navigate("/profile");
+          navigate("/admin-dashboard"); // Teacher bhi common dashboard par jayega
+        } else if (data.role === "student") {
+          navigate("/admin-dashboard"); // Student bhi common dashboard par jayega
         }
       } else {
         setError("Invalid Username or Password!");

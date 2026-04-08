@@ -25,6 +25,8 @@ import Timings from "./pages/school/Timings";
 import Prospectus from "./pages/school/Prospectus";
 import Facilities from "./pages/school/Facilities";
 import StudentProfile from "./pages/user/StudentProfile";
+import TeacherHome from "./pages/TeacherHome";
+import StudentHome from "./pages/StudentHome";
 
 // 1. ScrollToTop ko import karein
 import ScrollToTop from "./pages/components/ScrollToTop";
@@ -39,9 +41,12 @@ function LayoutWrapper({ children }) {
     "/management",
     "/profile",
     "/admin-dashboard",
+    "/teacher-dashboard", // Naya path
+    "/student-dashboard", // Naya path
     "/user/settings",
     "/admin/students",
   ];
+
   // Check karein ki kya current path inme se kisi se shuru hota hai
   const isDashboard = dashboardPaths.some((path) =>
     location.pathname.startsWith(path),
@@ -79,12 +84,20 @@ export default function App() {
           <Route path="/school/prospectus" element={<Prospectus />} />
           <Route path="/school/facilities" element={<Facilities />} />
           {/* PROTECTED DASHBOARD ROUTES */}
+          // App.jsx ke andar Routes section mein:
           <Route
             path="/admin-dashboard"
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <AdminHome />
+                  {(() => {
+                    const role = localStorage.getItem("user_role");
+                    if (role === "admin" || role === "superuser")
+                      return <AdminHome />;
+                    if (role === "teacher") return <TeacherHome />;
+                    if (role === "student") return <StudentHome />;
+                    return <Login />; // Fallback
+                  })()}
                 </DashboardLayout>
               </ProtectedRoute>
             }

@@ -23,7 +23,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const navLinks = [
     {
-      to: "/admin-dashboard",
+      to: "/admin-dashboard", // Yeh common rahega sabke liye
       label: "Dashboard",
       icon: <FaChartPie />,
       roles: ["admin", "superuser", "teacher", "student"],
