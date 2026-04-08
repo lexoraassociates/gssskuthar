@@ -8,6 +8,7 @@ import {
   FaSignOutAlt,
   FaShieldAlt,
   FaTimes,
+  FaUsers,
 } from "react-icons/fa";
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -32,6 +33,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       label: "Admissions",
       icon: <FaUserGraduate />,
       roles: ["admin", "superuser"],
+    },
+    {
+      to: "/admin/students",
+      label: "Students List",
+      icon: <FaUsers />,
+      roles: ["admin", "superuser", "teacher"],
     },
     {
       to: "/management/gallery",

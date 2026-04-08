@@ -136,7 +136,7 @@ export default function DashboardLayout({ children }) {
                   </Link>
 
                   <Link
-                    to="/settings"
+                    to="/user/settings"
                     className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-colors font-bold text-sm group border-b border-gray-50 pb-4"
                   >
                     <FaCog className="text-gray-400 group-hover:text-pink-500" />{" "}

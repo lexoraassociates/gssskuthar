@@ -13,6 +13,9 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminAdmissions from "./pages/AdminAdmissions";
 import AdmissionForm from "./pages/AdmissionForm";
 import ManageGallery from "./pages/ManageGallery";
+import MyProfile from "./pages/user/MyProfile";
+import AccountSettings from "./pages/user/AccountSettings";
+import StudentManagement from "./pages/admin/StudentManagement";
 import ManageNotifications from "./pages/components/ManageNotifications";
 import AllNotifications from "./pages/AllNotifications";
 import History from "./pages/school/History";
@@ -29,9 +32,19 @@ import ScrollToTop from "./pages/components/ScrollToTop";
 function LayoutWrapper({ children }) {
   const location = useLocation();
 
-  const isDashboard =
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/management");
+  // Dashboard routes ki list jahan Navbar/Footer nahi dikhana
+  const dashboardPaths = [
+    "/admin",
+    "/management",
+    "/student-profile",
+    "/admin-dashboard",
+    "/user/settings",
+    "/admin/students",
+  ];
+  // Check karein ki kya current path inme se kisi se shuru hota hai
+  const isDashboard = dashboardPaths.some((path) =>
+    location.pathname.startsWith(path),
+  );
 
   return (
     <>
@@ -102,6 +115,36 @@ export default function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <ManageNotifications />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student-profile"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <MyProfile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/settings"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AccountSettings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/students"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <StudentManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             }
