@@ -59,7 +59,7 @@ export default function DashboardLayout({ children }) {
             >
               <FaBars size={20} />
             </button>
-            // DashboardLayout.jsx ke andar heading section:
+            {/* DashboardLayout.jsx ke andar heading section: */}
             <div className="hidden sm:block">
               <h1 className="text-lg font-black text-gray-800 tracking-tight leading-none">
                 GSSS{" "}
