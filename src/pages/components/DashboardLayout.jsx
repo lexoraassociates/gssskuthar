@@ -59,6 +59,7 @@ export default function DashboardLayout({ children }) {
             >
               <FaBars size={20} />
             </button>
+            // DashboardLayout.jsx ke andar heading section:
             <div className="hidden sm:block">
               <h1 className="text-lg font-black text-gray-800 tracking-tight leading-none">
                 GSSS{" "}
@@ -67,7 +68,9 @@ export default function DashboardLayout({ children }) {
                 </span>
               </h1>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
-                Admin Management Portal
+                {userRole === "student"
+                  ? "Student Portal"
+                  : "Admin Management Portal"}
               </p>
             </div>
           </div>
