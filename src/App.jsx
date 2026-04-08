@@ -24,6 +24,7 @@ import StaffDetails from "./pages/school/StaffDetails";
 import Timings from "./pages/school/Timings";
 import Prospectus from "./pages/school/Prospectus";
 import Facilities from "./pages/school/Facilities";
+import StudentProfile from "./pages/user/StudentProfile";
 
 // 1. ScrollToTop ko import karein
 import ScrollToTop from "./pages/components/ScrollToTop";
@@ -36,7 +37,7 @@ function LayoutWrapper({ children }) {
   const dashboardPaths = [
     "/admin",
     "/management",
-    "/student-profile",
+    "/profile",
     "/admin-dashboard",
     "/user/settings",
     "/admin/students",
@@ -77,7 +78,6 @@ export default function App() {
           <Route path="/school/timings" element={<Timings />} />
           <Route path="/school/prospectus" element={<Prospectus />} />
           <Route path="/school/facilities" element={<Facilities />} />
-
           {/* PROTECTED DASHBOARD ROUTES */}
           <Route
             path="/admin-dashboard"
@@ -120,11 +120,15 @@ export default function App() {
             }
           />
           <Route
-            path="/student-profile"
+            path="/profile" // Maine path simplify karke /profile kar diya hai
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <MyProfile />
+                  {localStorage.getItem("user_role") === "student" ? (
+                    <StudentProfile />
+                  ) : (
+                    <MyProfile />
+                  )}
                 </DashboardLayout>
               </ProtectedRoute>
             }

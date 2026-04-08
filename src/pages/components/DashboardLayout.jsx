@@ -128,7 +128,7 @@ export default function DashboardLayout({ children }) {
                   </Link>
 
                   <Link
-                    to="/student-profile"
+                    to="/profile"
                     className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-colors font-bold text-sm group"
                   >
                     <FaUserCog className="text-gray-400 group-hover:text-pink-500" />{" "}
