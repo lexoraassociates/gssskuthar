@@ -50,7 +50,7 @@ export default function Login() {
         } else if (data.role === "teacher") {
           navigate("/teacher-dashboard");
         } else {
-          navigate("/student-profile");
+          navigate("/profile");
         }
       } else {
         setError("Invalid Username or Password!");
