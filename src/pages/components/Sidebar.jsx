@@ -53,10 +53,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       roles: ["admin", "superuser", "teacher"],
     },
     {
-      to: "/student-profile",
+      to: "/profile",
       label: "My Profile",
       icon: <FaUserCircle />,
-      roles: ["student"],
+      roles: ["admin", "superuser", "teacher", "student"], // Sabke liye allow karein
     },
   ];
 
