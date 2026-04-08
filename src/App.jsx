@@ -133,14 +133,15 @@ export default function App() {
             }
           />
           <Route
-            path="/profile" // Maine path simplify karke /profile kar diya hai
+            path="/profile"
             element={
               <ProtectedRoute>
                 <DashboardLayout>
+                  {/* Key jodne se React har baar role check karega */}
                   {localStorage.getItem("user_role") === "student" ? (
-                    <StudentProfile />
+                    <StudentProfile key="student-p" />
                   ) : (
-                    <MyProfile />
+                    <MyProfile key="staff-p" />
                   )}
                 </DashboardLayout>
               </ProtectedRoute>

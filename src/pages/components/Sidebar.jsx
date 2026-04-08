@@ -17,8 +17,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const { pathname } = useLocation();
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.clear(); // Saara purana data saaf karein
     navigate("/login");
+    window.location.reload(); // Ise jodne se cache aur states clear ho jati hain
   };
 
   const navLinks = [
