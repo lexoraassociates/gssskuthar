@@ -33,32 +33,45 @@ export default function AdminAdmissions() {
 
   // 2. Approve Logic
   const handleApprove = async () => {
+    // 1. Validation Check
     if (!approvalData.admission_number || !approvalData.roll_number) {
       alert("Please assign both Admission Number and Roll Number.");
       return;
     }
 
     try {
+      // 2. Data ko sahi format mein taiyar karein
+      const dataToSend = {
+        admission_number: approvalData.admission_number,
+        roll_number: parseInt(approvalData.roll_number), // String ko Integer banayein
+        is_approved: true,
+      };
+
       const res = await fetchWithAuth(
         `https://test9.online/api/admissions/${selectedStudent.id}/`,
         {
           method: "PATCH",
-          body: JSON.stringify({
-            ...approvalData,
-            is_approved: true,
-          }),
+          headers: {
+            "Content-Type": "application/json", // Sabse zaroori: Backend ko batana ki JSON hai
+          },
+          body: JSON.stringify(dataToSend),
         },
       );
 
       if (res && res.ok) {
         alert("Student Approved Successfully! User account created.");
         setSelectedStudent(null);
-        setApprovalData({ admission_number: "", roll_number: "" }); // Reset Fields
-        fetchPending(); // List refresh karein
+        setApprovalData({ admission_number: "", roll_number: "" });
+        fetchPending();
+      } else {
+        // Agar backend error de (jaise 400 Bad Request)
+        const errorData = await res.json();
+        console.error("Backend Error:", errorData);
+        alert("Error: " + JSON.stringify(errorData));
       }
     } catch (err) {
       console.error("Approval error:", err);
-      alert("Failed to approve. Please check console.");
+      alert("Failed to approve. Connection issue.");
     }
   };
 
