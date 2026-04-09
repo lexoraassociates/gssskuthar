@@ -18,6 +18,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const handleLogout = () => {
     localStorage.clear();
+    sessionStorage.clear();
     navigate("/login"); // Ise jodne se cache aur states clear ho jati hain
   };
 
