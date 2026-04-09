@@ -12,7 +12,7 @@ export default function PrincipalMessage() {
             <div className="absolute inset-0 bg-blue-300 blur-2xl opacity-40 group-hover:opacity-60 transition"></div>
 
             <img
-              src={`${import.meta.env.BASE_URL}images/pri_kuthar.jpeg`}
+              src={`${import.meta.env.BASE_URL}images/pri_kuthar.jpg`}
               alt="Principal"
               className="relative w-72 h-72 object-cover rounded-xl shadow-xl border-4 border-white transform group-hover:-translate-y-2 group-hover:rotate-1 transition duration-500"
             />
