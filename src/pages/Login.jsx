@@ -41,7 +41,7 @@ export default function Login() {
         // Token aur User info save karein
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
-        localStorage.setItem("user_role", data.role);
+        localStorage.setItem("user_role", data.role.toLowerCase());
         localStorage.setItem("user_name", data.full_name || data.username);
 
         // Role ke hisaab se redirect karein

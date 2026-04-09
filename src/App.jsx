@@ -83,18 +83,30 @@ export default function App() {
           <Route path="/school/facilities" element={<Facilities />} />
           {/* PROTECTED DASHBOARD ROUTES */}
           // App.jsx ke andar Routes section mein:
+          {/* PROTECTED DASHBOARD ROUTES */}
           <Route
             path="/admin-dashboard"
             element={
               <ProtectedRoute>
                 <DashboardLayout>
                   {(() => {
-                    const role = localStorage.getItem("user_role");
-                    if (role === "admin" || role === "superuser")
+                    // Role nikal kar lowercase mein convert karein
+                    const role = localStorage
+                      .getItem("user_role")
+                      ?.toLowerCase();
+
+                    if (role === "admin" || role === "superuser") {
                       return <AdminHome />;
-                    if (role === "teacher") return <TeacherHome />;
-                    if (role === "student") return <StudentHome />;
-                    return <Login />; // Fallback
+                    }
+                    if (role === "teacher") {
+                      return <TeacherHome />;
+                    }
+                    if (role === "student") {
+                      return <StudentHome />;
+                    }
+
+                    // Agar kuch match na kare toh login par bhej de
+                    return <Login />;
                   })()}
                 </DashboardLayout>
               </ProtectedRoute>
@@ -136,7 +148,8 @@ export default function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   {/* Key jodne se React har baar role check karega */}
-                  {localStorage.getItem("user_role") === "student" ? (
+                  {localStorage.getItem("user_role")?.toLowerCase() ===
+                  "student" ? (
                     <StudentProfile key="student-p" />
                   ) : (
                     <MyProfile key="staff-p" />
