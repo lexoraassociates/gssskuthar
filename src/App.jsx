@@ -90,10 +90,10 @@ export default function App() {
                 <DashboardLayout>
                   {(() => {
                     const role = localStorage.getItem("user_role");
-                    if (role === "Admin" || role === "Superuser")
+                    if (role === "admin" || role === "superuser")
                       return <AdminHome />;
-                    if (role === "Teacher") return <TeacherHome />;
-                    if (role === "Student") return <StudentHome />;
+                    if (role === "teacher") return <TeacherHome />;
+                    if (role === "student") return <StudentHome />;
                     return <Login />; // Fallback
                   })()}
                 </DashboardLayout>
