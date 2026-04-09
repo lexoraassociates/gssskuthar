@@ -40,7 +40,8 @@ export default function DashboardLayout({ children }) {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    sessionStorage.clear();
+    window.location.href = "/login";
   };
 
   if (!token) return null;
