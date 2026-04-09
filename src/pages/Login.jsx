@@ -45,11 +45,11 @@ export default function Login() {
         localStorage.setItem("user_name", data.full_name || data.username);
 
         // Role ke hisaab se redirect karein
-        if (data.role === "admin" || data.role === "superuser") {
+        if (data.role === "Admin" || data.role === "Superuser") {
           navigate("/admin-dashboard");
-        } else if (data.role === "teacher") {
+        } else if (data.role === "Teacher") {
           navigate("/admin-dashboard"); // Teacher bhi common dashboard par jayega
-        } else if (data.role === "student") {
+        } else if (data.role === "Student") {
           navigate("/admin-dashboard"); // Student bhi common dashboard par jayega
         }
       } else {
